@@ -1,42 +1,50 @@
-require "http"
+require "cossack"
+require "http/params"
 require "json"
 require "../leyline"
+require "./exception"
 
 module Leyline
-  class Request
-    @response : HTTP::Client::Response
-    @token : String?
-    @language : String?
-    getter response
+  class Client
 
-    def initialize(@url : String, @token = nil, @language = nil, @page_size = Leyline::DEFAULT_PAGE_SIZE, @args = {} of String => String)
-      @url = Leyline::BASE_URL + @url
-      @response = HTTP::Client::Response.new(418)
-      @token = "Bearer #{@token}" unless @token =~ /^Bearer\s/
-    end
-
-    def get(page = -1, params = {} of String => String)
-      headers = HTTP::Headers.new
-      if @token
-        headers.add("Authorization", @token.as(String))
+    # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
+    def initialize(token = "", language = "en")
+      unless token.empty?
+        token = "Bearer #{token}" unless token =~ /^Bearer\s/
       end
 
-      headers.add("Accept-Language", @language.as(String)) if @language
+      @client = Cossack::Client.new(Leyline::BASE_URL) do |client|
+        client.use Cossack::RedirectionMiddleware
 
-      url = @url
-      if page >= 0
-        headers.add("X-Page-Size", @page_size.to_s)
-        params["page"] = page.to_s
+        client.headers["Authorization"] = token unless token.empty?
+        client.headers["Accept-Language"] = language
       end
-
-      @response = HTTP::Client.get("#{url}?#{HTTP::Params.encode(params)}", headers)
-
-      return @response.body
     end
 
-    def get_any(page = -1, params = {} of String => String)
-      get(page, params)
-      JSON.parse(@response.body)
+    # TODO: Handle paging
+    def request(endpoint, params = {} of String => String) : Cossack::Client::Response
+      endpoint = "/#{endpoint}" unless endpoint[0] == '/'
+
+      resp = @client.get(endpoint + HTTP::Params.encode(params))
+
+      case resp.status
+      when 200..299
+        return resp
+      when 403
+        raise Leyline::Exception.new("Invalid API Key", resp)
+      when 404
+        raise Leyline::Exception.new("Invalid API Endpoint", resp)
+      when 405..499
+        raise Leyline::Exception.new("Generic Client Error", resp)
+      when 500..599
+        raise Leyline::Exception.new("Server Error", resp)
+      else
+        raise Leyline::Exception.new("Unknown response code", resp)
+      end
+    end
+
+    def get(endpoint, params = {} of String => String) : String
+      request(endpoint, params).body
     end
   end
 end
