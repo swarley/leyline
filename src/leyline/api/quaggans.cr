@@ -13,10 +13,7 @@ module Leyline
     return Array(String).from_json(client.get("/quaggans")) if list.empty?
 
 
-    quaggans = Array(Hash(String, String)).from_json(
-      client.get("/quaggans"),
-      { "ids" => list }
-    )
+    quaggans = Array(Hash(String, String)).from_json(client.get("/quaggans"))
 
     quaggan_hash = {} of String => String
     quaggans.each { |quaggan| quaggan_hash[quaggan["id"]] = quaggan["url"] }

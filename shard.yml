@@ -7,8 +7,3 @@ authors:
 crystal: 0.23.1
 
 license: MIT
-
-dependencies:
-  cossack:
-    github: crystal-community/cossack
-    version: ~> 0.1

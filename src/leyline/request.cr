@@ -1,5 +1,4 @@
-require "cossack"
-require "http/params"
+require "http"
 require "json"
 require "../leyline"
 require "./exception"
@@ -8,26 +7,24 @@ module Leyline
   class Client
 
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
-    def initialize(token = "", language = "en")
-      unless token.empty?
+    def initialize(token : String? = nil, language : String? = nil)
+      @headers = HTTP::Headers.new
+
+      unless token.nil?
         token = "Bearer #{token}" unless token =~ /^Bearer\s/
+        @headers.add("Authorization", token) unless token.nil?
       end
 
-      @client = Cossack::Client.new(Leyline::BASE_URL) do |client|
-        client.use Cossack::RedirectionMiddleware
-
-        client.headers["Authorization"] = token unless token.empty?
-        client.headers["Accept-Language"] = language
-      end
+      @headers.add("Accept-Language", language) unless language.nil?
     end
 
     # TODO: Handle paging
-    def request(endpoint, params = {} of String => String) : Cossack::Client::Response
+    def request(endpoint, params = {} of String => String) : HTTP::Client::Response
       endpoint = "/#{endpoint}" unless endpoint[0] == '/'
 
-      resp = @client.get(endpoint + HTTP::Params.encode(params))
+      resp = HTTP::Client.get(endpoint + HTTP::Params.encode(params), @headers)
 
-      case resp.status
+      case resp.status_code
       when 200..299
         return resp
       when 403
