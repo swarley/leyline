@@ -24,3 +24,5 @@ module Leyline
     self.quaggans(list.join(','))
   end
 end
+
+p Leyline.quaggans

@@ -22,7 +22,7 @@ module Leyline
     def request(endpoint, params = {} of String => String) : HTTP::Client::Response
       endpoint = "/#{endpoint}" unless endpoint[0] == '/'
 
-      resp = HTTP::Client.get(endpoint + HTTP::Params.encode(params), @headers)
+      resp = HTTP::Client.get(Leyline::BASE_URL + endpoint + HTTP::Params.encode(params), @headers)
 
       case resp.status_code
       when 200..299
