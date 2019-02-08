@@ -6,7 +6,7 @@ module Leyline
     JSON.mapping(id: String, url: String)
   end
 
-  def self.quaggans(list = "", client = nil) Array(String) | Hash(String, String)
+  def self.quaggans(list = "", client = nil) : Array(String) | Hash(String, String)
     client = Leyline::Client.new()
 
     # With no arguments return a list with all quaggan ids
