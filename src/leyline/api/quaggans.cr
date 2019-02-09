@@ -1,4 +1,4 @@
-require "../request"
+require "../client"
 require "json"
 
 module Leyline
@@ -7,11 +7,10 @@ module Leyline
   end
 
   def self.quaggans(list = "", client = nil) : Array(String) | Hash(String, String)
-    client = Leyline::Client.new()
+    client = Leyline::Client.new
 
     # With no arguments return a list with all quaggan ids
     return Array(String).from_json(client.get("/quaggans")) if list.empty?
-
 
     quaggans = Array(Hash(String, String)).from_json(client.get("/quaggans"))
 
@@ -24,5 +23,3 @@ module Leyline
     self.quaggans(list.join(','))
   end
 end
-
-p Leyline.quaggans

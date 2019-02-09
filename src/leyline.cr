@@ -1,4 +1,5 @@
 require "./leyline/*"
+require "./leyline/api/quaggans"
 
 module Leyline
   BASE_URL = "https://api.guildwars2.com/v2"

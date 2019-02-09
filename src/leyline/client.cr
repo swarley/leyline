@@ -5,6 +5,7 @@ require "./exception"
 
 module Leyline
   class Client
+    property headers
 
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
     def initialize(token : String? = nil, language : String? = nil)
@@ -28,15 +29,16 @@ module Leyline
       when 200..299
         return resp
       when 403
-        raise Leyline::Exception.new("Invalid API Key", resp)
+        error_reason = JSON.parse(resp.body)
+        raise Leyline::Exception.new("Token Error accessing '#{endpoint}': #{error_reason["text"]}", resp)
       when 404
-        raise Leyline::Exception.new("Invalid API Endpoint", resp)
+        raise Leyline::Exception.new("Invalid API Endpoint '#{endpoint}'", resp)
       when 405..499
-        raise Leyline::Exception.new("Generic Client Error", resp)
+        raise Leyline::Exception.new("Client Error: #{resp.status_code}", resp)
       when 500..599
-        raise Leyline::Exception.new("Server Error", resp)
+        raise Leyline::Exception.new("Server Error: #{resp.status_code}", resp)
       else
-        raise Leyline::Exception.new("Unknown response code", resp)
+        raise Leyline::Exception.new("Unknown response code: #{resp.status_code}", resp)
       end
     end
 
