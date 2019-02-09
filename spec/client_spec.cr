@@ -49,5 +49,14 @@ describe Leyline::Client do
         Leyline::Client.new.request("/quaggans")
       end
     end
+
+    it "raises an exception for unknown status codes" do
+      WebMock.stub(:get, Leyline::BASE_URL + "/quaggans")
+        .to_return(status: 999)
+
+      expect_raises(Leyline::Exception, "Unknown response code: 999") do
+        Leyline::Client.new.request("/quaggans")
+      end
+    end
   end
 end
