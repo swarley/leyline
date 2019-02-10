@@ -2,10 +2,6 @@ require "../client"
 require "json"
 
 module Leyline
-  class Quaggan
-    JSON.mapping(id: String, url: String)
-  end
-
   def self.quaggans(list = "", client = nil) : Array(String) | Hash(String, String)
     client = Leyline::Client.new
 
