@@ -2,13 +2,24 @@ require "http"
 require "json"
 require "../leyline"
 require "./exception"
+require "./cache"
 
 module Leyline
   class Client
     property headers
 
+
+
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
     def initialize(token : String? = nil, language : String? = nil)
+      @id_cache = Leyline::Cache(Array(String)).new do |endpoint|
+        Array(String).from_json(get(endpoint))
+      end
+
+      @quaggan_cache = Leyline::Cache(String).new do |key|
+        Hash(String,String).from_json(get("/quaggans", {"id" => key}))["url"]
+      end
+
       @headers = HTTP::Headers.new
 
       unless token.nil?

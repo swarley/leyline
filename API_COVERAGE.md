@@ -29,11 +29,11 @@
   - ✖ /v2/achievements/daily
   - ✖ /v2/achievements/daily/tomorrow
   - ✖ /v2/achievements/groups
-- ✖ /v2/backstory
-  - ✖ /v2/backstory/answers
-  - ✖ /v2/backstory/questions
+- ✖ \*! /v2/backstory
+  - ✖ \*! /v2/backstory/answers
+  - ✖ \*! /v2/backstory/questions
 - ✖ /v2/build
-- ✖ /v2/cats
+- ✖ \*! /v2/cats
 - ✖ /v2/characters
   - ✖ /v2/characters/:id/backstory
   - ✖ /v2/characters/:id/core
@@ -86,7 +86,7 @@
 - ✖ /v2/mounts
   - ✖ /v2/mounts/skins
   - ✖ /v2/mounts/types
-- ✖ /v2/nodes
+- ✖ \*! /v2/nodes
 - ✖ /v2/outfits
 - ✖ /v2/pets
 - ✖ /v2/professions
@@ -104,7 +104,7 @@
 - ✖ /v2/raids
 - ✖ /v2/recipes
   - ✖ /v2/recipes/search
-- ✖ /v2/skills
+- ✖ \*! /v2/skills
 - ✖ /v2/skins
 - ✖ /v2/specializations
 - ✖ /v2/stories
@@ -120,3 +120,9 @@
   - ✖ /v2/wvw/objectives
   - ✖ /v2/wvw/ranks
   - ✖ /v2/wvw/upgrades
+
+`✖` Not supported
+`✔` Supported
+
+`*` Needs memoization with `Leyline::Cache`
+`!` Needs tests
