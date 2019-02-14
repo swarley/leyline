@@ -1,5 +1,4 @@
 require "./spec_helper"
-require "webmock"
 
 describe Leyline::Client do
   describe "#initialize" do

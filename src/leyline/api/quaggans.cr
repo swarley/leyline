@@ -25,13 +25,13 @@ module Leyline
       # the cache logic?
     end
 
-    def cache(quaggan : Quaggan, time = Time.now)
+    def cache_quaggan(quaggan : Quaggan, time = Time.now)
       @quaggans[quaggan.id] = {time, quaggan}
     end
 
-    def cache(quaggans : Array(Quaggan))
+    def cache_quaggans(quaggans : Array(Quaggan))
       time = Time.now
-      quaggans.each { |q| cache(q, time) }
+      quaggans.each { |q| cache_quaggan(q, time) }
     end
   end
 
@@ -41,14 +41,21 @@ module Leyline
 
       if all_ids.nil?
         all_ids = Array(String).from_json(get("/quaggans"))
+        # TODO: Change to cache_id_list
         @cache.cache({ids: all_ids, endpoint: "/quaggans"})
       end
 
       quaggans(all_ids)
     end
 
-    def quaggans(list : String)
-      quaggans(list.split(/\s*,\s*/))
+    def quaggan(id : String)
+      quaggan = @cache.quaggan(id)
+      if quaggan.nil?
+        quaggan = Quaggan.from_json(get("/quaggans", {"id" => id}))
+        @cache.cache_quaggan(quaggan)
+      end
+
+      return quaggan.url
     end
 
     def quaggans(list : Array(String))
@@ -64,7 +71,7 @@ module Leyline
 
       unless uncached.empty?
         uncached_quaggans = Array(Quaggan).from_json(get("/quaggans", {"ids" => uncached.join(',')}))
-        @cache.cache(uncached_quaggans)
+        @cache.cache_quaggans(uncached_quaggans)
         uncached_quaggans.each do |quaggan|
           cached_quaggans[quaggan.id] = quaggan.url
         end

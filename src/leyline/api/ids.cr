@@ -15,7 +15,7 @@ module Leyline
       end
     end
 
-    def cache(tup : NamedTuple(ids: Array(String), endpoint: String))
+    def cache_id_list(tup : NamedTuple(ids: Array(String), endpoint: String))
       @ids[tup[:endpoint]] = {Time.now, tup[:ids]}
     end
   end
