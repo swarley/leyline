@@ -3,47 +3,39 @@ require "json"
 require "../leyline"
 require "./exception"
 require "./cache"
-require "./api/skills"
+require "./api/quaggans"
 
 module Leyline
   class Client
+
     property headers
 
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
     def initialize(token : String? = nil, language : String? = nil)
-      @id_cache = Leyline::Cache(Array(String)).new(single: ->(endpoint : String) {
-        if endpoint == "/skills"
-          return Array(Int32).from_json(get(endpoint)).map(&.to_s)
-        end
+      # @id_cache = Leyline::Cache(Array(String)).new(single: ->(endpoint : String) {
+      #   if endpoint == "/skills"
+      #     return Array(Int32).from_json(get(endpoint)).map(&.to_s)
+      #   end
 
-        Array(String).from_json(get(endpoint))
-      })
+      #   Array(String).from_json(get(endpoint))
+      # })
 
-      @cat_cache = Leyline::Cache(Leyline::Cat).new(single: ->(key : String) {
-      })
-      # Might want to have key be Array(String) | String
-      @quaggan_cache = Leyline::Cache(String).new(single: ->(key : String) {
-        puts "requesting"
-        Hash(String, String).from_json(get("/quaggans", {"id" => key}))["url"]
-      },
-        multiple: ->(keys : Array(String)) {
-          _quaggans = {} of String => CacheData(String)
-          Array(Hash(String, String)).from_json(get("/quaggans?ids=#{keys.join ','}")).each do |quaggan|
-            _quaggans[quaggan["id"]] = CacheData(String).new(quaggan["url"])
-          end
-          return _quaggans
-        })
+      # @cat_cache = Leyline::Cache(Leyline::Cat).new(single: ->(key : String) {
+      # })
+      # # Might want to have key be Array(String) | String
 
-      @skill_cache = Leyline::Cache(Leyline::Skill).new(single: ->(key : String) {
-        Leyline::Skill.from_json(get("/skills", {"id" => key}))
-      },
-        multiple: ->(keys : Array(String)) {
-          _skills = {} of String => CacheData(Leyline::Skill)
-          Array(Skill).from_json(get("/skills?ids=#{keys.join ','}")).each do |skill|
-            _skills[skill.id.to_s] = CacheData(Leyline::Skill).new(skill)
-          end
-          return _skills
-        })
+      # @skill_cache = Leyline::Cache(Leyline::Skill).new(single: ->(key : String) {
+      #   Leyline::Skill.from_json(get("/skills", {"id" => key}))
+      # },
+      #   multiple: ->(keys : Array(String)) {
+      #     _skills = {} of String => CacheData(Leyline::Skill)
+      #     Array(Skill).from_json(get("/skills?ids=#{keys.join ','}")).each do |skill|
+      #       _skills[skill.id.to_s] = CacheData(Leyline::Skill).new(skill)
+      #     end
+      #     return _skills
+      #   })
+
+      @cache = Leyline::Cache.new
 
       @headers = HTTP::Headers.new
 

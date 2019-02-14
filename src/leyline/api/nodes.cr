@@ -11,7 +11,7 @@ module Leyline
 
     def node?(id : String) : Bool
       !JSON.parse(get("/nodes", {"id" => id}))["id"].nil?
-    rescue Leyline::Exception => e
+    rescue e
       return false
     end
   end

@@ -11,7 +11,7 @@ describe "Leyline.quaggans" do
   #   client.quaggans.should eq ["404", "Beach", "Scifi", "Pink"]
   # end
 
-  it "returns a hash of quaggans, {id => url}, when a list is provided" do
+  it "returns a hash of all quaggans, {id => url}, when no arguments are given" do
     WebMock.stub(:get, Leyline::BASE_URL + "/quaggans")
       .to_return(body: %(["scifi", "404"]))
     WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=all")
@@ -19,6 +19,28 @@ describe "Leyline.quaggans" do
     WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=scifi,404")
       .to_return(body: %([{"id": "scifi", "url": "scifi-url"}, {"id": "404", "url": "404-url"}]))
 
-    client.quaggans("all").should eq ({"scifi" => "scifi-url", "404" => "404-url"})
+    client.quaggans().should eq ({"scifi" => "scifi-url", "404" => "404-url"})
+  end
+
+  it "returns a hash of named quaggans when a list of ids are given" do
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans")
+      .to_return(body: %(["scifi", "404", "never-reached", "nor-is-this"]))
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=all")
+      .to_return(body: %([{"id": "scifi", "url": "scifi-url"}, {"id": "404", "url": "404-url"}]))
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=scifi,404")
+      .to_return(body: %([{"id": "scifi", "url": "scifi-url"}, {"id": "404", "url": "404-url"}]))
+
+    client.quaggans(["scifi", "404"]).should eq ({"scifi" => "scifi-url", "404" => "404-url"})
+  end
+
+  it "splits a comma separated list and returns a hash with the given ids" do
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans")
+      .to_return(body: %(["scifi", "404", "never-reached", "nor-is-this"]))
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=all")
+      .to_return(body: %([{"id": "scifi", "url": "scifi-url"}, {"id": "404", "url": "404-url"}]))
+    WebMock.stub(:get, Leyline::BASE_URL + "/quaggans?ids=scifi,404")
+      .to_return(body: %([{"id": "scifi", "url": "scifi-url"}, {"id": "404", "url": "404-url"}]))
+
+    client.quaggans("scifi,  404").should eq ({"scifi" => "scifi-url", "404" => "404-url"})
   end
 end
