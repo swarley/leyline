@@ -15,9 +15,8 @@ module Leyline
   class Skill
     module FactConverter
       def self.from_json(parser : JSON::PullParser)
-        objects = [] of (AttributeAdjust | Buff | ComboField | ComboFinisher | Damage | Distance | Duration | Heal | HealingAdjust | NoData | Number | Percent | PrefixedBuff | Radius | Range | Recharge | Time | Unblockable)
-        parser.read_array do
-          puts "reading new object"
+        objects = [] of FactType
+        parser.read_array_or_null do
           json = parser.read_raw
           case JSON.parse(json)["type"].as_s
           when "AttributeAdjust"
@@ -96,12 +95,12 @@ module Leyline
 
     class ComboFinisher < Fact
       getter finisher_type : String
-      getter percent : Int32
+      getter percent : Float32
     end
 
     class Damage < Fact
       getter hit_count : Int32
-      getter dmg_multiplier : Int32
+      getter dmg_multiplier : Float32
     end
 
     class Distance < Fact
@@ -128,7 +127,7 @@ module Leyline
     end
 
     class Percent < Fact
-      getter percent : Int32
+      getter percent : Float32
     end
 
     class Prefix
@@ -136,8 +135,8 @@ module Leyline
 
       getter text : String
       getter icon : String
-      getter status : String
-      getter description : String
+      getter status : String?
+      getter description : String?
       getter requires_trait : Int32?
       getter overrides : Int32?
     end
@@ -164,12 +163,17 @@ module Leyline
 
       getter text : String
       getter type : String
-      getter value : Int32
+      getter value : Float32?
       getter requires_trait : Int32?
       getter overrides : Int32?
     end
 
-    class Time < Fact
+    class Time
+      include JSON::Serializable
+
+      getter text : String
+      getter type : String
+      getter icon : String
       getter duration : Int32
     end
 
@@ -182,6 +186,8 @@ module Leyline
       getter requires_trait : Int32?
       getter overrides : Int32?
     end
+
+    alias FactType = AttributeAdjust | Buff | ComboField | ComboFinisher | Damage | Distance | Duration | Heal | HealingAdjust | NoData | Number | Percent | PrefixedBuff | Radius | Range | Recharge | Time | Unblockable
   end
 end
 
@@ -196,11 +202,11 @@ module Leyline
     getter chat_link : String
     getter type : String?
     getter weapon_type : String?
-    getter professions : Array(String)
+    getter professions : Array(String)?
     getter slot : String?
     @[JSON::Field(converter: Leyline::Skill::FactConverter)]
-    getter facts : Array(AttributeAdjust | Buff | ComboField | ComboFinisher | Damage | Distance | Duration | Heal | HealingAdjust | NoData | Number | Percent | PrefixedBuff | Radius | Range | Recharge | Time | Unblockable)
-    getter traited_facts : Array(AttributeAdjust | Buff | ComboField | ComboFinisher | Damage | Distance | Duration | Heal | HealingAdjust | NoData | Number | Percent | PrefixedBuff | Radius | Range | Recharge | Time | Unblockable)?
+    getter facts : Array(FactType)?
+    getter traited_facts : Array(FactType)?
     getter categories : Array(String)?
     getter attunement : String?
     getter cost : Int32?
@@ -217,6 +223,31 @@ module Leyline
     # is likely necessary
     def self.get(id : Int32, client = Leyline::Client.new)
       Leyline::Skill.from_json(client.get("/skills", {"id" => id.to_s}))
+    end
+  end
+
+  class Client
+    def skill(id : Int32)
+      skill(id.to_s)
+    end
+
+    def skill(id : String)
+      @skill_cache[id]
+    end
+
+    def skills(ids : Array(Int))
+      skills(ids.map(&.to_s))
+    end
+
+    def skills(ids : Array(String))
+      return @skill_cache[ids]
+    end
+
+    # I wouldn't recommend using this unless you've got memory to spare
+    # 2900 objects will be cached in memory that only have a 1 hour
+    # life span
+    def skills : Hash(String, Leyline::Skill)
+      skills(@id_cache["/skills"])
     end
   end
 end

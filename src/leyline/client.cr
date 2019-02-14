@@ -3,22 +3,47 @@ require "json"
 require "../leyline"
 require "./exception"
 require "./cache"
+require "./api/skills"
 
 module Leyline
   class Client
     property headers
 
-
-
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
     def initialize(token : String? = nil, language : String? = nil)
-      @id_cache = Leyline::Cache(Array(String)).new do |endpoint|
-        Array(String).from_json(get(endpoint))
-      end
+      @id_cache = Leyline::Cache(Array(String)).new(single: ->(endpoint : String) {
+        if endpoint == "/skills"
+          return Array(Int32).from_json(get(endpoint)).map(&.to_s)
+        end
 
-      @quaggan_cache = Leyline::Cache(String).new do |key|
-        Hash(String,String).from_json(get("/quaggans", {"id" => key}))["url"]
-      end
+        Array(String).from_json(get(endpoint))
+      })
+
+      @cat_cache = Leyline::Cache(Leyline::Cat).new(single: ->(key : String) {
+      })
+      # Might want to have key be Array(String) | String
+      @quaggan_cache = Leyline::Cache(String).new(single: ->(key : String) {
+        puts "requesting"
+        Hash(String, String).from_json(get("/quaggans", {"id" => key}))["url"]
+      },
+        multiple: ->(keys : Array(String)) {
+          _quaggans = {} of String => CacheData(String)
+          Array(Hash(String, String)).from_json(get("/quaggans?ids=#{keys.join ','}")).each do |quaggan|
+            _quaggans[quaggan["id"]] = CacheData(String).new(quaggan["url"])
+          end
+          return _quaggans
+        })
+
+      @skill_cache = Leyline::Cache(Leyline::Skill).new(single: ->(key : String) {
+        Leyline::Skill.from_json(get("/skills", {"id" => key}))
+      },
+        multiple: ->(keys : Array(String)) {
+          _skills = {} of String => CacheData(Leyline::Skill)
+          Array(Skill).from_json(get("/skills?ids=#{keys.join ','}")).each do |skill|
+            _skills[skill.id.to_s] = CacheData(Leyline::Skill).new(skill)
+          end
+          return _skills
+        })
 
       @headers = HTTP::Headers.new
 
@@ -33,7 +58,10 @@ module Leyline
     # TODO: Handle paging
     def request(endpoint, params = {} of String => String) : HTTP::Client::Response
       endpoint = "/#{endpoint}" unless endpoint[0] == '/'
-      resp = HTTP::Client.get("#{Leyline::BASE_URL}#{endpoint}?#{HTTP::Params.encode(params)}", @headers)
+
+      url = Leyline::BASE_URL + endpoint
+      url += "?" + HTTP::Params.encode(params) unless params.empty?
+      resp = HTTP::Client.get(url, @headers)
 
       case resp.status_code
       when 200..299
