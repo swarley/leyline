@@ -40,7 +40,7 @@ module Leyline
         node_list = Array(String).from_json(get("/nodes"))
         @cache.cache_nodes(node_list)
       end
-      return node_list.includes? id
+      node_list.includes? id
     end
   end
 end

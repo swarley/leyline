@@ -29,11 +29,11 @@
   - ✖ /v2/achievements/daily
   - ✖ /v2/achievements/daily/tomorrow
   - ✖ /v2/achievements/groups
-- ✖ \*! /v2/backstory
-  - ✖ \*! /v2/backstory/answers
-  - ✖ \*! /v2/backstory/questions
+- ✖ /v2/backstory
+  - ✖ /v2/backstory/answers
+  - ✖ /v2/backstory/questions
 - ✖ /v2/build
-- ✖ \*! /v2/cats
+- ✔ ! /v2/cats
 - ✖ /v2/characters
   - ✖ /v2/characters/:id/backstory
   - ✖ /v2/characters/:id/core
@@ -86,7 +86,7 @@
 - ✖ /v2/mounts
   - ✖ /v2/mounts/skins
   - ✖ /v2/mounts/types
-- ✖ \*! /v2/nodes
+- ✔ /v2/nodes
 - ✖ /v2/outfits
 - ✖ /v2/pets
 - ✖ /v2/professions
@@ -110,9 +110,9 @@
 - ✖ /v2/stories
   - ✖ /v2/stories/seasons
 - ✖ /v2/titles
-- ✖ /v2/tokeninfo
+- ✔ \* /v2/tokeninfo
 - ✖ /v2/traits
-- ✖ /v2/worlds
+- ✔ /v2/worlds
 - ✖ /v2/wvw
   - ✖ /v2/wvw/abilities
   - ✖ /v2/wvw/matches

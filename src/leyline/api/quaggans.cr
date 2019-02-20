@@ -20,9 +20,8 @@ module Leyline
     end
 
     def quaggan(ids : Array(String)) : Array(Quaggan)
-      # TODO: This one needs more thought since, what should we do if we hit
-      # an outdated value? Maybe we want to move the ability to self update back into
-      # the cache logic?
+      # Don't return out of date ids
+      @quaggans.reject { |q| Time.now - q[0] > 1.hour }
     end
 
     def cache_quaggan(quaggan : Quaggan, time = Time.now)
@@ -41,11 +40,16 @@ module Leyline
 
       if all_ids.nil?
         all_ids = Array(String).from_json(get("/quaggans"))
-        # TODO: Change to cache_id_list
-        @cache.cache({ids: all_ids, endpoint: "/quaggans"})
+        @cache.cache_id_list("/quaggans", all_ids)
       end
 
-      quaggans(all_ids)
+      # Hash(String => Tuple(Time, Quaggan)) -> Hash(String => String)
+      q_hash = @cache.quaggans.transform_values { |q| q[1].url }
+      uncached = all_ids - q_hash.keys
+      Array(Quaggan).from_json(get("/quaggans", {"ids" => uncached.join(',')})).each do |q|
+        q_hash[q.id] = q.url
+      end
+      q_hash
     end
 
     def quaggan(id : String)

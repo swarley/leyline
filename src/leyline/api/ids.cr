@@ -2,7 +2,6 @@ require "../client"
 require "../cache"
 
 module Leyline
-
   class Cache
     @ids = {} of String => Tuple(Time, Array(String))
     getter ids
@@ -15,8 +14,8 @@ module Leyline
       end
     end
 
-    def cache_id_list(tup : NamedTuple(ids: Array(String), endpoint: String))
-      @ids[tup[:endpoint]] = {Time.now, tup[:ids]}
+    def cache_id_list(endpoint : String, ids : Array(String))
+      @ids[endpoint] = {Time.now, ids}
     end
   end
 end

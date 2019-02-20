@@ -18,5 +18,4 @@ describe "Leyline.nodes" do
     client.node?("basic_cloth_rack").should eq true
     client.node?("not_a_valid_node").should eq false
   end
-
 end

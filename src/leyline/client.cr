@@ -3,11 +3,13 @@ require "json"
 require "../leyline"
 require "./exception"
 require "./cache"
+require "./api/ids"
 require "./api/quaggans"
+require "./api/nodes"
+require "./api/worlds"
 
 module Leyline
   class Client
-
     property headers
 
     # TODO: Handle paging @page_size = Leyline::DEFAULT_PAGE_SIZE
@@ -22,6 +24,10 @@ module Leyline
       end
 
       @headers.add("Accept-Language", language) unless language.nil?
+    end
+
+    def token=(str : String)
+      @headers.add("Authorization", str)
     end
 
     # TODO: Handle paging
