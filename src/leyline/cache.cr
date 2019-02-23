@@ -6,6 +6,12 @@ module Leyline
   end
 
   class Cache
+    # This macro is for creating caches that are simple in nature and fall into a large umbrella
+    # of simple endpoints.
+    #
+    # It provides 4 methods, 2 for caching, and 2 for retreiving the cache data.
+    # `getter types`, `type(id)`, `cache_type(type)`, `cache_types(Array(type))`
+    #
     macro generate_simple_cache(type, index_type)
       @{{type.id.downcase}}s = {} of {{index_type.id}} => Tuple(Time, {{type.id}})
       getter {{type.id.downcase}}s
