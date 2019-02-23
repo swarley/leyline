@@ -8,30 +8,7 @@ module Leyline
   record Quaggan, id : String, url : String { include JSON::Serializable }
 
   class Cache
-    @quaggans = {} of String => Tuple(Time, Quaggan)
-    getter quaggans
-
-    def quaggan(id : String) : Quaggan | Nil
-      if element = @quaggans[id]?
-        time, object = element
-        return nil if Time.now - time > 1.hour
-        object
-      end
-    end
-
-    def quaggan(ids : Array(String)) : Array(Quaggan)
-      # Don't return out of date ids
-      @quaggans.reject { |q| Time.now - q[0] > 1.hour }
-    end
-
-    def cache_quaggan(quaggan : Quaggan, time = Time.now)
-      @quaggans[quaggan.id] = {time, quaggan}
-    end
-
-    def cache_quaggans(quaggans : Array(Quaggan))
-      time = Time.now
-      quaggans.each { |q| cache_quaggan(q, time) }
-    end
+    generate_simple_cache(Quaggan, String)
   end
 
   class Client

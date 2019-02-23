@@ -13,29 +13,7 @@ module Leyline
   end
 
   class Cache
-    @worlds = {} of String => Tuple(Time, World)
-
-    def world(id : String)
-      if element = @worlds[id]?
-        time, object = element
-        return nil if Time.now - time > 1.hour
-        object
-      end
-    end
-
-    def worlds
-      # Reject out of date Worlds
-      @worlds.reject { |_, _world| Time.now - _world[0] > 1.hour }
-    end
-
-    def cache_world(world)
-      @worlds[world.id] = {Time.now, world}
-    end
-
-    def cache_worlds(_worlds : Array(World))
-      time = Time.now
-      _worlds.each { |q| cache_world(q, time) }
-    end
+    generate_simple_cache(World, String)
   end
 
   class Client

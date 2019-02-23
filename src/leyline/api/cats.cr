@@ -11,33 +11,7 @@ module Leyline
   end
 
   class Cache
-    @cats = {} of String => Tuple(Time, Cat)
-    getter cats
-
-    # TODO: Things like this and quaggans can be made into a
-    # `simple_cache` macro since they use the exact same logic
-    def cat(id : String) : Cat | Nil
-      if element = @cats[id]?
-        time, object = element
-        return nil if Time.now - time > 1.hour
-        object
-      end
-    end
-
-    # TODO cluster fuck
-    def cat(ids : Array(String)) : Array(Cat)
-      # Don't return out of date ids
-      @cats.reject { |c| Time.now - c[0] > 1.hour }
-    end
-
-    def cache_cat(cat : Cat, time = Time.now)
-      @cats[cat.id] = {time, cat}
-    end
-
-    def cache_cats(cats : Array(Cat))
-      time = Time.now
-      cats.each { |c| cache_cat(c, time) }
-    end
+    generate_simple_cache(Cat, String)
   end
 
   class Client
@@ -60,7 +34,7 @@ module Leyline
 
     # TODO: Implement this and `Client#worlds(Array(String))` at the same time
     def cats(id_list : Array(String)) : Array(Cat)
-      cat_hash = @cache.cats.transform_values {|_cat| _cat[1]}
+      cat_hash = @cache.cats.transform_values { |_cat| _cat[1] }
       uncached = id_list - cat_hash.keys
 
       Array(Leyline::Cat).from_json(get("/cats", {"ids" => uncached.join(',')})).each do |_cat|

@@ -3,10 +3,7 @@ require "json"
 require "../leyline"
 require "./exception"
 require "./cache"
-require "./api/ids"
-require "./api/quaggans"
-require "./api/nodes"
-require "./api/worlds"
+require "./api"
 
 module Leyline
   class Client

@@ -1,3 +1,5 @@
+require "./api/*"
+
 module Leyline
   module API
     module IntToStrConverter
